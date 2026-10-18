@@ -2,21 +2,21 @@
 # yarn lockfile v1
 
 
-"@anchor-lang/borsh@^1.0.0-rc.2":
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@anchor-lang/borsh/-/borsh-1.0.0-rc.2.tgz#a7b7db665ae1be77ad06a9ff8c284fef4ca9eff3"
+"@anchor-lang/borsh@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@anchor-lang/borsh/-/borsh-1.0.0.tgz#a7b7db665ae1be77ad06a9ff8c284fef4ca9eff3"
   integrity sha512-EYXF4mzc/LsAl5sYfMT92cmsk+AnND3Sg8Ce41gO0p32yf7ZQ6aFToy8tVFx3xF5/3tKuzZ2x+Ch2a3OUytnbQ==
   dependencies:
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@anchor-lang/core@^1.0.0-rc.2":
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@anchor-lang/core/-/core-1.0.0-rc.2.tgz#918f8c3fe64bc4e9ec298eb8babcccc0c88579c1"
+"@anchor-lang/core@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@anchor-lang/core/-/core-1.0.0.tgz#918f8c3fe64bc4e9ec298eb8babcccc0c88579c1"
   integrity sha512-41M7G6wLR9WrWevZM8uF58KTG+I/6aLX3Sh9xYTGyQtqg/Qkc50Qu7ZYdgEHfQD/rWlurUlew4tfmmB1EwxbXQ==
   dependencies:
-    "@anchor-lang/borsh" "^1.0.0-rc.2"
-    "@anchor-lang/errors" "^1.0.0-rc.2"
+    "@anchor-lang/borsh" "^1.0.0"
+    "@anchor-lang/errors" "^1.0.0"
     "@noble/hashes" "^1.3.1"
     "@solana/web3.js" "^1.69.0"
     bn.js "^5.1.2"
@@ -29,9 +29,9 @@
     superstruct "^0.15.4"
     toml "^3.0.0"
 
-"@anchor-lang/errors@^1.0.0-rc.2":
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@anchor-lang/errors/-/errors-1.0.0-rc.2.tgz#9e3e33631a20d09acb8a0e7ed3cd7c88427fc985"
+"@anchor-lang/errors@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@anchor-lang/errors/-/errors-1.0.0.tgz#9e3e33631a20d09acb8a0e7ed3cd7c88427fc985"
   integrity sha512-9CzimQ8mvPcAkYuaF82SWCgBaPk+Gsvxv1HpEo5ybXmWxf+S5Un6xUQ+AV06Me6q8X1uExGB/+h2Gfi+ZbzPMQ==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.28.6", "@babel/code-frame@^7.29.0":

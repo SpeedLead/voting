@@ -1,15 +1,12 @@
 [toolchain]
-anchor_version = "1.0.0-rc.2"
+anchor_version = "1.0.0"
 
 [features]
 resolution = true
 skip-lint = false
 
 [programs.localnet]
-voting = "DzSG9vpCQttfKoLAYxCJHnkKcU1LZN3arLw6vDJ8vk5k"
-
-[registry]
-url = "https://api.apr.dev"
+voting = "EBjDJfGpMvttgiWdyrqK6jrBExUgK92EHdK6xw2Gr49v"
 
 [provider]
 cluster = "localnet"

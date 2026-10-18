@@ -16,7 +16,7 @@ Anyone can create a poll with a name, description, and a voting window. The poll
 
 - [Rust](https://rustup.rs/)
 - [Solana CLI](https://solana.com/developers/guides/getstarted/setup-local-development)
-- [Anchor CLI](https://www.anchor-lang.com/docs/installation) v1.0.0-rc.2
+- [Anchor CLI](https://www.anchor-lang.com/docs/installation) v1.0.0
 - [Node.js](https://nodejs.org/) + [Yarn](https://yarnpkg.com/)
 
 ## Building
