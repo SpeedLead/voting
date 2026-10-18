@@ -1,5 +1,6 @@
 use anchor_lang::declare_program;
 use anchor_litesvm::{AnchorContext, AnchorLiteSVM, AssertionHelpers, Pubkey, Signer, TestHelpers};
+use anchor_lang::prelude::*;
 
 declare_program!(voting);
 
