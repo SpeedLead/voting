@@ -44,6 +44,7 @@ pub mod voting {
         }
 
         candidate_account.candidate_votes += 1;
+        ctx.accounts.vote_receipt.candidate = candidate_account.key();
 
         Ok(())
     }
@@ -56,7 +57,7 @@ pub struct InitializePoll<'info> {
     pub signer: Signer<'info>,
 
     #[account(
-        init_if_needed,
+        init,
         payer = signer,
         space = 8 + PollAccount::INIT_SPACE,
         seeds = [b"poll".as_ref(), poll_id.to_le_bytes().as_ref()],
@@ -111,6 +112,19 @@ pub struct Vote<'info> {
         bump
     )]
     pub candidate_account: Account<'info, CandidateAccount>,
+
+    /// One receipt per (poll, voter). `init` fails if the voter already has
+    /// one, which is what stops a wallet from voting twice.
+    #[account(
+        init,
+        payer = signer,
+        space = 8 + VoteReceipt::INIT_SPACE,
+        seeds = [b"receipt".as_ref(), poll_id.to_le_bytes().as_ref(), signer.key().as_ref()],
+        bump
+    )]
+    pub vote_receipt: Account<'info, VoteReceipt>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
@@ -119,6 +133,12 @@ pub struct CandidateAccount {
     #[max_len(32)]
     pub candidate_name: String,
     pub candidate_votes: u64,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct VoteReceipt {
+    pub candidate: Pubkey,
 }
 
 #[account]

@@ -34,7 +34,15 @@ fn get_candidate_pda(poll_id: u64, candidate: &str) -> Pubkey {
     Pubkey::find_program_address(&[&poll_id.to_le_bytes(), candidate.as_bytes()], &self::voting::ID).0
 }
 
-fn initialize_poll(
+fn get_receipt_pda(poll_id: u64, voter: &Pubkey) -> Pubkey {
+    Pubkey::find_program_address(
+        &[b"receipt", &poll_id.to_le_bytes(), voter.as_ref()],
+        &self::voting::ID,
+    )
+    .0
+}
+
+fn try_initialize_poll(
     ctx: &mut AnchorContext,
     signer: &anchor_litesvm::Keypair,
     poll_id: u64,
@@ -42,7 +50,7 @@ fn initialize_poll(
     end_time: u64,
     name: &str,
     description: &str,
-) {
+) -> anchor_litesvm::TransactionResult {
     let poll_pda = get_poll_pda(poll_id);
 
     let ix = ctx
@@ -62,9 +70,21 @@ fn initialize_poll(
         .instruction()
         .unwrap();
 
-    let result = ctx.execute_instruction(ix, &[signer]).unwrap();
-    result.assert_success();
-    ctx.svm.assert_account_exists(&poll_pda);
+    ctx.execute_instruction(ix, &[signer]).unwrap()
+}
+
+fn initialize_poll(
+    ctx: &mut AnchorContext,
+    signer: &anchor_litesvm::Keypair,
+    poll_id: u64,
+    start_time: u64,
+    end_time: u64,
+    name: &str,
+    description: &str,
+) {
+    try_initialize_poll(ctx, signer, poll_id, start_time, end_time, name, description)
+        .assert_success();
+    ctx.svm.assert_account_exists(&get_poll_pda(poll_id));
 }
 
 fn initialize_candidate(
@@ -104,6 +124,8 @@ fn cast_vote(
             signer: signer.pubkey(),
             poll_account: get_poll_pda(poll_id),
             candidate_account: get_candidate_pda(poll_id, candidate),
+            vote_receipt: get_receipt_pda(poll_id, &signer.pubkey()),
+            system_program: anchor_lang::system_program::ID,
         })
         .args(args::Vote {
             _poll_id: poll_id,
@@ -243,4 +265,101 @@ fn test_vote_after_end_fails() {
     cast_vote(&mut ctx, &voter, poll_id, "Alice")
         .assert_failure()
         .assert_anchor_error("VotingEnded");
+}
+
+#[test]
+fn test_double_vote_fails() {
+    let mut ctx = setup();
+    let authority = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+    let voter = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+
+    let poll_id = 1;
+    initialize_poll(
+        &mut ctx,
+        &authority,
+        poll_id,
+        0,
+        2_000,
+        "Test Poll",
+        "A test poll for voting",
+    );
+    initialize_candidate(&mut ctx, &authority, poll_id, "Alice");
+    initialize_candidate(&mut ctx, &authority, poll_id, "Bob");
+
+    cast_vote(&mut ctx, &voter, poll_id, "Alice").assert_success();
+
+    // Retrying the same vote. The blockhash has to change, otherwise the
+    // runtime rejects the resend as a duplicate and the program never runs.
+    ctx.svm.expire_blockhash();
+    cast_vote(&mut ctx, &voter, poll_id, "Alice").assert_failure();
+
+    // Switching candidates is a distinct transaction, so this one really does
+    // reach the program and gets turned away by the receipt PDA.
+    cast_vote(&mut ctx, &voter, poll_id, "Bob").assert_failure();
+
+    let alice_account: CandidateAccount = ctx.get_account(&get_candidate_pda(poll_id, "Alice")).unwrap();
+    let bob_account: CandidateAccount = ctx.get_account(&get_candidate_pda(poll_id, "Bob")).unwrap();
+    assert_eq!(alice_account.candidate_votes, 1);
+    assert_eq!(bob_account.candidate_votes, 0);
+}
+
+#[test]
+fn test_second_voter_can_still_vote() {
+    let mut ctx = setup();
+    let authority = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+    let first = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+    let second = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+
+    let poll_id = 1;
+    initialize_poll(
+        &mut ctx,
+        &authority,
+        poll_id,
+        0,
+        2_000,
+        "Test Poll",
+        "A test poll for voting",
+    );
+    initialize_candidate(&mut ctx, &authority, poll_id, "Alice");
+
+    cast_vote(&mut ctx, &first, poll_id, "Alice").assert_success();
+    cast_vote(&mut ctx, &second, poll_id, "Alice").assert_success();
+
+    let alice_account: CandidateAccount = ctx.get_account(&get_candidate_pda(poll_id, "Alice")).unwrap();
+    assert_eq!(alice_account.candidate_votes, 2);
+}
+
+#[test]
+fn test_reinitialize_poll_fails() {
+    let mut ctx = setup();
+    let authority = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+    let attacker = ctx.svm.create_funded_account(10_000_000_000).unwrap();
+
+    let poll_id = 1;
+    initialize_poll(
+        &mut ctx,
+        &authority,
+        poll_id,
+        0,
+        2_000,
+        "Test Poll",
+        "A test poll for voting",
+    );
+
+    // Re-running initialize_poll on a live poll must not rewrite its window.
+    try_initialize_poll(
+        &mut ctx,
+        &attacker,
+        poll_id,
+        9_000,
+        9_999,
+        "Hijacked Poll",
+        "Window moved out from under the voters",
+    )
+    .assert_failure();
+
+    let poll_account: PollAccount = ctx.get_account(&get_poll_pda(poll_id)).unwrap();
+    assert_eq!(poll_account.poll_name, "Test Poll");
+    assert_eq!(poll_account.poll_voting_start, 0);
+    assert_eq!(poll_account.poll_voting_end, 2_000);
 }

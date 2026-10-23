@@ -20,7 +20,7 @@ custom-heap = []
 custom-panic = []
 
 [dependencies]
-anchor-lang = { version = "1.0.0", features = ["init-if-needed"] }
+anchor-lang = "1.0.0"
 solana-hash = { version = "3.0.0", features = ["serde"] }
 
 [dev-dependencies]

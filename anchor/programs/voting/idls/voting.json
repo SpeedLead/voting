@@ -199,6 +199,42 @@
               }
             ]
           }
+        },
+        {
+          "name": "vote_receipt",
+          "docs": [
+            "One receipt per (poll, voter). `init` fails if the voter already has",
+            "one, which is what stops a wallet from voting twice."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -238,6 +274,19 @@
         74,
         172,
         45
+      ]
+    },
+    {
+      "name": "VoteReceipt",
+      "discriminator": [
+        104,
+        20,
+        204,
+        252,
+        45,
+        84,
+        37,
+        195
       ]
     }
   ],
@@ -294,6 +343,18 @@
           {
             "name": "poll_option_index",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoteReceipt",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "candidate",
+            "type": "pubkey"
           }
         ]
       }
