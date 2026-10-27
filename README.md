@@ -9,7 +9,7 @@ Anyone can create a poll with a name, description, and a voting window. The poll
 ## Program ID
 
 ```
-65KHV8cXwJ8apTKMqnpSdhdHkHhRySatgKMwnxm6C3gG
+SmZQBkA1YQ98giYUKnCFbQQGQbqQJVFAyvFhcDAByMH
 ```
 
 ## Prerequisites
